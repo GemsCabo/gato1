@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Juego del Gato - X y O</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .game-title {
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+            background-color: #34495e;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border: none;
+            font-size: 40px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cell:hover {
+            background-color: #ecf0f1;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .winner {
+            background-color: #2ecc71 !important;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">JUEGO DEL GATO</h1>
+    <div class="game-board" id="board">
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+    </div>
+    <button class="reset-btn" onclick="resetGame()">Reiniciar Juego</button>
+
+    <script>
+        const X_CLASS = '❌';
+        const O_CLASS = '⭕';
+        const WINNING_COMBINATIONS = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontales
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Verticales
+            [0, 4, 8], [2, 4, 6] // Diagonales
+        ];
+
+        let currentPlayer = X_CLASS;
+        const cells = document.querySelectorAll('[data-cell]');
+        let gameActive = true;
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleClick, { once: true });
+        });
+
+        function handleClick(e) {
+            const cell = e.target;
+            
+            if (!gameActive || cell.textContent !== '') return;
+
+            placeMark(cell);
+            
+            if (checkWin()) {
+                endGame(true);
+            } else if (isDraw()) {
+                endGame(false);
+            } else {
+                swapTurns();
+            }
+        }
+
+        function placeMark(cell) {
+            cell.textContent = currentPlayer;
+        }
+
+        function swapTurns() {
+            currentPlayer = currentPlayer === X_CLASS ? O_CLASS : X_CLASS;
+        }
+
+        function checkWin() {
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => {
+                    return cells[index].textContent === currentPlayer;
+                });
+            });
+        }
+
+        function endGame(win) {
+            gameActive = false;
+            if (win) {
+                WINNING_COMBINATIONS.forEach(combination => {
+                    if (combination.every(index => cells[index].textContent === currentPlayer)) {
+                        combination.forEach(index => cells[index].classList.add('winner'));
+                    }
+                });
+                setTimeout(() => alert(`¡${currentPlayer} ha ganado!`), 100);
+            } else {
+                setTimeout(() => alert('¡Empate!'), 100);
+            }
+        }
+
+        function isDraw() {
+            return [...cells].every(cell => cell.textContent !== '');
+        }
+
+        function resetGame() {
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('winner');
+                cell.addEventListener('click', handleClick, { once: true });
+            });
+            currentPlayer = X_CLASS;
+            gameActive = true;
+        }
+    </script>
+</body>
+</html>
